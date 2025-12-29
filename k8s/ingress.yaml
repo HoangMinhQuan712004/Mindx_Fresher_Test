@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mindx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - 20.6.50.12.sslip.io
+    secretName: sslip-io-tls
+  rules:
+  - host: 20.6.50.12.sslip.io
+    http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: mindx-api-service
+            port:
+              number: 80
+      - path: /()(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: mindx-frontend-service
+            port:
+              number: 80

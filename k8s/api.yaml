@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mindx-api
+  labels:
+    app: mindx-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mindx-api
+  template:
+    metadata:
+      labels:
+        app: mindx-api
+    spec:
+      containers:
+      - name: api
+        image: hoangminhquan01.azurecr.io/mindx-api:v6
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: OIDC_AUTHORITY
+          value: "https://id-dev.mindx.edu.vn"
+        - name: OIDC_CLIENT_ID
+          value: "mindx-onboarding"
+        - name: OIDC_CONFIG_URL
+          value: "https://id-dev.mindx.edu.vn/.well-known/openid-configuration"
+        - name: OIDC_JWKS_URI
+          value: "https://id-dev.mindx.edu.vn/.well-known/jwks.json"
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oidc-auth-secret
+              key: OIDC_CLIENT_SECRET
+      imagePullSecrets:
+      - name: acr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mindx-api-service
+spec:
+  selector:
+    app: mindx-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
