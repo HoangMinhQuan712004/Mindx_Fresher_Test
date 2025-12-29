@@ -11,10 +11,10 @@
 
 ```bash
 # 1. Define Variables
-RESOURCE_GROUP="mindx-resources"
+RESOURCE_GROUP="mindx-intern-02-rg"
 LOCATION="southeastasia"
-ACR_NAME="hoangminhquan01"    # Must be globally unique
-AKS_NAME="mindx-cluster"
+ACR_NAME="hoangminhquan01"    
+AKS_NAME="mindx-aks-cluster"
 
 # 2. Create Resource Group
 az group create --name $RESOURCE_GROUP --location $LOCATION
