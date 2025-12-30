@@ -54,16 +54,25 @@ export const Dashboard = () => {
     const completedCount = week2Tasks.filter(t => t.completed).length;
     const week2Percentage = Math.round((completedCount / week2Tasks.length) * 100);
 
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+
     const toggleTask = (id: number) => {
         setWeek2Tasks(week2Tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
     };
 
-    const handleLogout = () => {
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = () => {
         if (oidcAuth.isAuthenticated) {
-            oidcAuth.signoutRedirect();
+            // Local-Only Logout: Clear app session without hitting MindX ID server
+            // This bypasses the registration/redirect issues entirely
+            oidcAuth.removeUser();
+            window.location.href = '/login';
         } else {
             standardAuth.logout();
-            window.location.reload(); // Force reload to clear state and return to login
+            window.location.reload();
         }
     };
 
@@ -86,6 +95,28 @@ export const Dashboard = () => {
 
     return (
         <div className="dashboard-container">
+            {showLogoutModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3 style={{ marginBottom: '1rem' }}>Confirm Logout</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                            Are you sure you want to log out of your account?
+                        </p>
+                        <div className="modal-actions">
+                            <button className="btn-secondary" onClick={() => setShowLogoutModal(false)}>
+                                Cancel
+                            </button>
+                            <button
+                                style={{ background: 'var(--error)' }}
+                                onClick={confirmLogout}
+                            >
+                                Yes, Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="profile-header">
                 <div>
                     <h1 style={{ textAlign: 'left', marginBottom: '0.25rem' }}>
@@ -94,7 +125,7 @@ export const Dashboard = () => {
                     <p style={{ color: 'var(--text-muted)' }}>Great to see you again.</p>
                 </div>
                 <button
-                    onClick={handleLogout}
+                    onClick={handleLogoutClick}
                     style={{ width: 'auto', padding: '0.625rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
                 >
                     Logout
