@@ -1,3 +1,4 @@
+import * as appInsights from 'applicationinsights';
 import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
@@ -5,6 +6,19 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
+// Initialize Application Insights before other imports
+if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
+    appInsights.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+        .setAutoCollectRequests(true)
+        .setAutoCollectPerformance(true, true)
+        .setAutoCollectExceptions(true)
+        .setAutoCollectDependencies(true)
+        .setAutoCollectConsole(true, true)
+        .setSendLiveMetrics(true)
+        .start();
+    console.log("✅ Application Insights initialized");
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -142,6 +156,20 @@ app.get('/me', validateToken, (req: Request, res: Response) => {
     res.json({
         message: 'Xác thực thành công!',
         user: (req as any).user
+    });
+});
+
+// Test endpoint for App Insights - used for verifying Alerts
+app.get('/test-error', (req: Request, res: Response) => {
+    const errorMsg = "This is a deliberate test error for monitoring verification.";
+    console.error(`🔴 App Insights Test: ${errorMsg}`);
+
+    // Explicitly track the exception if needed, though auto-collect handles it
+    appInsights.defaultClient?.trackException({ exception: new Error(errorMsg) });
+
+    res.status(500).json({
+        error: 'Test Error Triggered',
+        message: errorMsg
     });
 });
 
