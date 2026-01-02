@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import { useAuth as useStandardAuth } from "../context/AuthContext";
+import { logPageView, logEvent } from "../analytics";
 
 export const Dashboard = () => {
     const oidcAuth = useOidcAuth();
@@ -8,6 +9,11 @@ export const Dashboard = () => {
 
     // State for API-fetched user profile (to get missing email)
     const [apiUser, setApiUser] = useState<any>(null);
+
+    // Google Analytics: Track page view on mount
+    useEffect(() => {
+        logPageView();
+    }, []);
 
     // Fetch full profile from backend when OIDC is used
     useEffect(() => {
@@ -66,6 +72,9 @@ export const Dashboard = () => {
 
     const confirmLogout = () => {
         if (oidcAuth.isAuthenticated) {
+            // Track logout event
+            logEvent('Auth', 'Logout', 'OIDC');
+
             // Local-Only Logout: Clear app session without hitting MindX ID server
             // This bypasses the registration/redirect issues entirely
             oidcAuth.removeUser();
