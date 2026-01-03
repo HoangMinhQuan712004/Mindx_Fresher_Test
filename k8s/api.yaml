@@ -16,13 +16,18 @@ spec:
     spec:
       containers:
       - name: api
-        image: hoangminhquan01.azurecr.io/mindx-api:v6
+        image: hoangminhquan01.azurecr.io/mindx-api:v21
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
         - name: PORT
           value: "3000"
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: monitoring-secret
+              key: APPLICATIONINSIGHTS_CONNECTION_STRING
         - name: OIDC_AUTHORITY
           value: "https://id-dev.mindx.edu.vn"
         - name: OIDC_CLIENT_ID

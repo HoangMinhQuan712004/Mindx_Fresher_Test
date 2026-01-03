@@ -1,3 +1,7 @@
+import crypto from 'crypto';
+if (!(global as any).crypto) {
+    (global as any).crypto = crypto;
+}
 import * as appInsights from 'applicationinsights';
 import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
