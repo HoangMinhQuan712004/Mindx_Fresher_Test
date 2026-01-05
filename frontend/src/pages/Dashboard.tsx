@@ -133,12 +133,25 @@ export const Dashboard = () => {
                     </h1>
                     <p style={{ color: 'var(--text-muted)' }}>Great to see you again.</p>
                 </div>
-                <button
-                    onClick={handleLogoutClick}
-                    style={{ width: 'auto', padding: '0.625rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                >
-                    Logout
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        onClick={() => {
+                            fetch('/api/test-error')
+                                .then(res => res.json())
+                                .then(data => alert(`Backend Error Triggered: ${data.message}`))
+                                .catch(() => alert('Failed to reach backend'));
+                        }}
+                        style={{ width: 'auto', padding: '0.625rem 1.25rem', background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.2)' }}
+                    >
+                        ⚠️ Trigger Test Error
+                    </button>
+                    <button
+                        onClick={handleLogoutClick}
+                        style={{ width: 'auto', padding: '0.625rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                    >
+                        Logout
+                    </button>
+                </div>
             </div>
 
             <div className="profile-info">

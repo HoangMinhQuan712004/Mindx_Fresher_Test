@@ -7,7 +7,10 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+# Define build-time arguments
+ARG VITE_GA_TRACKING_ID
+# Pass arguments to the build process
+RUN VITE_GA_TRACKING_ID=$VITE_GA_TRACKING_ID npm run build
 
 # Production stage
 FROM node:18-alpine

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: hoangminhquan01.azurecr.io/mindx-api:v21
+        image: hoangminhquan01.azurecr.io/mindx-api:v23
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

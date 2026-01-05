@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: hoangminhquan01.azurecr.io/mindx-frontend:v11
+        image: hoangminhquan01.azurecr.io/mindx-frontend:v24
         imagePullPolicy: Always
         ports:
         - containerPort: 80

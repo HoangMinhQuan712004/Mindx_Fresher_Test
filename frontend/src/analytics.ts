@@ -1,20 +1,29 @@
-import ReactGA from 'react-ga4';
-
-const TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID || '';
+// Google Analytics manual integration helpers
+// Explicitly define gtag on window
+declare global {
+    interface Window {
+        gtag: (...args: any[]) => void;
+    }
+}
 
 export const initGA = () => {
-    if (TRACKING_ID) {
-        ReactGA.initialize(TRACKING_ID);
-        console.log("✅ Google Analytics 4 initialized with ID:", TRACKING_ID);
-    } else {
-        console.warn("⚠️ Google Analytics ID (VITE_GA_TRACKING_ID) is missing.");
-    }
+    // Manual script in index.html handles initialization
+    console.log("✅ Google Analytics 4 (Manual) active.");
 };
 
 export const logPageView = () => {
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+    if (window.gtag) {
+        window.gtag('event', 'page_view', {
+            page_path: window.location.pathname,
+        });
+    }
 };
 
 export const logEvent = (category: string, action: string, label?: string) => {
-    ReactGA.event({ category, action, label });
+    if (window.gtag) {
+        window.gtag('event', action, {
+            'event_category': category,
+            'event_label': label,
+        });
+    }
 };

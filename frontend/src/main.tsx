@@ -3,10 +3,8 @@ import ReactDOM from 'react-dom/client'
 import { AuthProvider } from "react-oidc-context";
 import { AuthProvider as StandardAuthProvider } from './context/AuthContext';
 import App from './App.tsx'
-import { initGA } from './analytics';
 
-// Initialize Google Analytics
-initGA();
+// Initialization handled via index.html script tag
 
 const initAuth = async () => {
     try {

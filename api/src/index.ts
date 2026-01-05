@@ -2,14 +2,14 @@ import crypto from 'crypto';
 if (!(global as any).crypto) {
     (global as any).crypto = crypto;
 }
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import * as appInsights from 'applicationinsights';
 import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import cors from 'cors';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 // Initialize Application Insights before other imports
 if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
@@ -168,12 +168,48 @@ app.get('/test-error', (req: Request, res: Response) => {
     const errorMsg = "This is a deliberate test error for monitoring verification.";
     console.error(`🔴 App Insights Test: ${errorMsg}`);
 
-    // Explicitly track the exception if needed, though auto-collect handles it
-    appInsights.defaultClient?.trackException({ exception: new Error(errorMsg) });
+    // Explicitly track the request as a failure
+    appInsights.defaultClient?.trackRequest({
+        name: "GET /api/test-error",
+        url: req.url,
+        duration: 10,
+        resultCode: "500",
+        success: false
+    });
+
+    // Also track the exception for deeper logs
+    const error = new Error(errorMsg);
+    appInsights.defaultClient?.trackException({ exception: error });
 
     res.status(500).json({
         error: 'Test Error Triggered',
         message: errorMsg
+    });
+});
+
+// Global Error Handler to ensure all 500s are tracked
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error('💥 Global Error Handler:', err);
+
+    if (appInsights.defaultClient) {
+        // Track as Request Failure (Status: False)
+        appInsights.defaultClient.trackRequest({
+            name: `${req.method} ${req.url}`,
+            url: req.url,
+            duration: 10, // dummy duration
+            resultCode: "500",
+            success: false
+        });
+
+        // Track as Exception
+        appInsights.defaultClient.trackException({
+            exception: err instanceof Error ? err : new Error(String(err))
+        });
+    }
+
+    res.status(500).json({
+        error: 'Internal Server Error',
+        message: err.message || 'Something went wrong'
     });
 });
 

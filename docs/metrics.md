@@ -45,7 +45,7 @@ To fulfill the requirement of "Alerts are setup and tested", follow these steps 
 5. Click **"Review + create"**.
 
 ### Step 2: Create a Server Error Alert (High Failure Rate)
-1. Go to your **Application Insights** (`mindx-app-insights`) -> **"Alerts"** -> **"+ Create"** -> **"Alert rule"**.
+1. Go to **Application Insights** (`mindx-app-insights`) -> **"Alerts"** -> **"+ Create"** -> **"Alert rule"**.
 2. **Condition**: 
    - Signal: **"Failed requests"** (Search for it).
    - Threshold: **Static**.
@@ -54,8 +54,8 @@ To fulfill the requirement of "Alerts are setup and tested", follow these steps 
    - Threshold value: **5**.
    - Unit: **Count**.
    - Granularity: **5 minutes**.
-3. **Actions**: Select the Action Group you created in Step 1.
-4. **Details**: Name it `Alert-High-Failure-Rate` and set Severity to **1 (Error)**.
+3. **Actions**: Select the Action Group you created in Step 1 (**AdminEmail** group).
+4. **Details**: Name it `HighServerErrorAlert` and set Severity to **1 - Critical**.
 5. Click **"Create"**.
 
 ### Step 3: Create a Performance Alert (Slow Response)
@@ -80,13 +80,21 @@ We use **Google Analytics 4 (GA4)** to track user engagement and interactions wi
 - **Page Views**: Automatically tracked on component mount (e.g., Dashboard).
 - **Authentication Events**: Tracks when a user performs a logout action (Event Category: `Auth`, Action: `Logout`).
 
-## 5. Verification & Testing
+## 5. Reliability & Hardening (Backend)
 
-### Azure Alerts
-1. Trigger the test endpoint: `curl https://20.6.50.12.sslip.io/api/test-error` (Run this 10 times in a row).
-2. Wait 5-10 minutes.
-3. Check your **Email** for a notification from Microsoft Azure containing the alert details.
-4. Go to **"Alerts"** in the Azure Portal to see the "Fired" status of your rules.
+We implemented specific hardening steps to ensure 100% reliable tracking in an ESM/TypeScript environment:
+- **Global Error Handler**: Every HTTP 500 is caught and tracked via `trackException`.
+- **Manual Request Tracking**: Due to ESM auto-collection limitations, we explicitly implemented `appInsights.defaultClient.trackRequest` within the error handler to ensure failures are correctly aggregated into the "Failed requests" metric.
+
+## 6. Verification & Testing
+
+### Azure Alerts (Manual Verification)
+1. **Frontend Button**: Log in to the Dashboard and find the **"⚠️ Trigger Test Error"** button.
+2. **Action**: Click the button **15 times** (to exceed the threshold of 5).
+3. **Observation**:
+    - Check **"Transaction Search"**: Verify that "Request" count is non-zero and color-coded red (Status: False).
+    - Check **"Failures"**: Observe the spike in the failure graph.
+4. **Result**: Wait 5 minutes for the Alert to trigger (**"Fired"** status) and an email notification to be sent to the administrator.
 
 ### Google Analytics
 1. Access the application and navigate through different pages.
